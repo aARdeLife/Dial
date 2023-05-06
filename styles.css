@@ -12,6 +12,15 @@ body {
     position: relative;
 }
 
+.dial-background {
+    width: 100%;
+    height: 100%;
+    background-image: url('https://raw.githubusercontent.com/aARdeLife/Dial/708a8658374ca0abb7c5d1aa0d2c5cede01db0e3/o.png');
+    background-size: cover;
+    position: absolute;
+    z-index: 1;
+}
+
 .dial {
     width: 100%;
     height: 100%;
@@ -20,4 +29,5 @@ body {
     position: absolute;
     cursor: pointer;
     transform-origin: center;
+    z-index: 2;
 }
