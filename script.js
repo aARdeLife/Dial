@@ -1,51 +1,76 @@
-const dialContainer = document.getElementById('dial-container');
-const dial = document.getElementById('dial');
-const dialMiddle = document.getElementById('dial-middle');
-
-dialMiddle.style.display = 'none'; // Hide the orange dial by default
+const dial = document.getElementById("dial");
+const dialMiddle = document.getElementById("dial-middle");
+const dialContainer = document.getElementById("dial-container");
 
 let isRotating = false;
-let initialAngle = 0;
-let currentAngle = 0;
+let lastMouseAngle = null;
 
-function rotateDial(event) {
-    if (!isRotating) return;
-    const rect = dial.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const angle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * 180 / Math.PI;
-    const delta = initialAngle - angle;
-    dial.style.transform = `rotate(${-delta + currentAngle}deg)`;
+function getAngleFromMouseEvent(event) {
+  const rect = dial.getBoundingClientRect();
+  const center = {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+
+  const angle =
+    (Math.atan2(event.clientY - center.y, event.clientX - center.x) * 180) /
+    Math.PI;
+
+  return angle;
 }
 
-dial.addEventListener('mousedown', event => {
-    isRotating = true;
-    const rect = dial.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    initialAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX) * 180 / Math.PI;
+dial.addEventListener("mousedown", (event) => {
+  isRotating = true;
+  lastMouseAngle = getAngleFromMouseEvent(event);
 });
 
-document.addEventListener('mousemove', rotateDial);
+document.addEventListener("mousemove", (event) => {
+  if (isRotating) {
+    const currentMouseAngle = getAngleFromMouseEvent(event);
+    const delta = currentMouseAngle - lastMouseAngle;
 
-document.addEventListener('mouseup', () => {
-    if (!isRotating) return;
-    isRotating = false;
-    currentAngle = (360 + currentAngle - initialAngle) % 360;
+    const currentRotation = parseFloat(dial.style.transform.match(/rotate\((.+)deg\)/)[1]);
+    const newRotation = currentRotation + delta;
+
+    dial.style.transform = `rotate(${newRotation}deg)`;
+    dialMiddle.style.transform = `rotate(${newRotation}deg)`;
+    dialContainer.style.transform = `rotate(${newRotation}deg)`;
+
+    lastMouseAngle = currentMouseAngle;
+  }
 });
 
-dial.addEventListener('dblclick', () => {
-    dialMiddle.style.display = dialMiddle.style.display === 'none' ? 'block' : 'none';
+document.addEventListener("mouseup", () => {
+  isRotating = false;
 });
 
-dialMiddle.addEventListener('dblclick', () => {
-    const dialBackground = document.querySelector('.dial-background');
-    dialBackground.style.display = dialBackground.style.display === 'none' ? 'block' : 'none';
+let doubleClickTimeout = null;
+
+dial.addEventListener("click", () => {
+  if (doubleClickTimeout) {
+    clearTimeout(doubleClickTimeout);
+    doubleClickTimeout = null;
+
+    if (dialMiddle.style.display === "none") {
+      dialMiddle.style.display = "block";
+    } else if (dialContainer.style.display === "none") {
+      dialContainer.style.display = "block";
+    } else {
+      dialContainer.style.display = "none";
+      dialMiddle.style.display = "none";
+    }
+  } else {
+    doubleClickTimeout = setTimeout(() => {
+      clearTimeout(doubleClickTimeout);
+      doubleClickTimeout = null;
+    }, 250);
+  }
 });
 
-dialContainer.addEventListener('click', event => {
-    if (event.target !== dialContainer) return;
-    dialMiddle.style.display = 'none';
-    const dialBackground = document.querySelector('.dial-background');
-    dialBackground.style.display = 'none';
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".dial")) {
+    dialContainer.style.display = "none";
+    dialMiddle.style.display = "none";
+  }
 });
+
