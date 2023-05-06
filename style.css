@@ -15,7 +15,7 @@ body {
 .dial {
     width: 100%;
     height: 100%;
-    background-image: url('path/to/your/dial/image.png');
+    background-image: url('https://raw.githubusercontent.com/aARdeLife/Dial/2ca36a501f23bbd5e9215bd7b593cf27a119f7fc/Asset%201mdpi.png');
     background-size: cover;
     position: absolute;
     cursor: pointer;
