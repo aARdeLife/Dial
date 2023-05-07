@@ -19,9 +19,12 @@ body {
 }
 
 .dial {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 100px;
   height: 100px;
+  transform: translateY(-50%) translateX(-50%);
   background-image: url("https://raw.githubusercontent.com/aARdeLife/Dial/b21d1e78f573072f9cf660639d462405866b7938/red.png");
   background-size: cover;
   background-repeat: no-repeat;
