@@ -3,36 +3,37 @@ const dial = document.getElementById("dial");
 const dialMiddle = document.getElementById("dial-middle");
 const dialBackground = document.getElementById("dial-background");
 
-let dialRotation = 0;
 let isDragging = false;
-let doubleClickTimer;
 
-dial.addEventListener("mousedown", (e) => {
-  e.preventDefault();
-  isDragging = true;
-});
+function addEventListenersToDial(dialElement) {
+  dialElement.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    isDragging = true;
+  });
 
-dial.addEventListener("mousemove", (e) => {
-  if (isDragging) {
-    const angle = calculateAngle(e, dial);
-    dialRotation = angle;
-    dial.style.transform = `rotate(${angle}deg)`;
-  }
-});
+  dialElement.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      const angle = calculateAngle(e, dialElement);
+      dialElement.style.transform = `rotate(${angle}deg)`;
+    }
+  });
 
-dial.addEventListener("mouseup", () => {
-  isDragging = false;
-  dial.style.transition = "transform 0.5s";
-  dialRotation = 0;
-  dial.style.transform = `rotate(${dialRotation}deg)`;
+  dialElement.addEventListener("mouseup", () => {
+    isDragging = false;
+    dialElement.style.transition = "transform 0.5s";
+    dialElement.style.transform = `rotate(0deg)`;
 
-  setTimeout(() => {
-    dial.style.transition = "none";
-  }, 500);
-});
+    setTimeout(() => {
+      dialElement.style.transition = "none";
+    }, 500);
+  });
+}
+
+addEventListenersToDial(dial);
+addEventListenersToDial(dialMiddle);
+addEventListenersToDial(dialBackground);
 
 dial.addEventListener("dblclick", () => {
-  clearTimeout(doubleClickTimer);
   if (dialMiddle.style.display === "none") {
     dialMiddle.style.display = "block";
   } else {
@@ -49,4 +50,18 @@ dialMiddle.addEventListener("dblclick", (e) => {
   }
 });
 
-dialContainer.addEventListener
+dialContainer.addEventListener("click", () => {
+  dialMiddle.style.display = "none";
+  dialBackground.style.display = "none";
+});
+
+function calculateAngle(event, dial) {
+  const rect = dial.getBoundingClientRect();
+  const center = {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+  };
+  const angle = Math.atan2(event.clientY - center.y, event.clientX - center.x);
+  const degree = angle * (180 / Math.PI) + 90;
+  return degree;
+}
