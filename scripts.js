@@ -1,59 +1,65 @@
 const dial = document.getElementById("dial");
 const dialMiddle = document.getElementById("dial-middle");
 const dialBackground = document.getElementById("dial-background");
-const dialContainer = document.getElementById("dial-container");
 
-let dialRotation = 0;
-let dialMiddleRotation = 0;
-let dialBackgroundRotation = 0;
+function getAngle(x1, y1, x2, y2) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  let angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  if (angle < 0) angle += 360;
+  return angle;
+}
 
-dial.addEventListener("mousedown", rotateDial);
-dialMiddle.addEventListener("mousedown", rotateDial);
-dialBackground.addEventListener("mousedown", rotateDial);
+function rotateDial(dial, angle) {
+  dial.style.transform = `rotate(${angle}deg)`;
+}
 
-dial.addEventListener("dblclick", (e) => {
-  e.stopPropagation();
-  if (dialMiddle.style.display === "none") {
-    dialMiddle.style.display = "block";
-  } else {
-    dialMiddle.style.display = "none";
-  }
-});
+function onDialMouseDown(event) {
+  event.preventDefault();
+  event.stopPropagation();
 
-dialMiddle.addEventListener("dblclick", (e) => {
-  e.stopPropagation();
-  if (dialBackground.style.display === "none") {
-    dialBackground.style.display = "block";
-  } else {
-    dialBackground.style.display = "none";
-  }
-});
-
-document.addEventListener("click", () => {
-  dialMiddle.style.display = "none";
-  dialBackground.style.display = "none";
-});
-
-function rotateDial(e) {
-  e.stopPropagation();
-  const dialId = e.target.id;
-  const dialElement = document.getElementById(dialId);
-  let dialRotation = 0;
+  const dial = event.currentTarget;
+  const dialRect = dial.getBoundingClientRect();
+  const dialCenterX = dialRect.x + dialRect.width / 2;
+  const dialCenterY = dialRect.y + dialRect.height / 2;
 
   function onMouseMove(event) {
-    const { offsetX, offsetY } = event;
-    const atan = Math.atan2(offsetY - dialElement.offsetHeight / 2, offsetX - dialElement.offsetWidth / 2);
-    const deg = -atan * (180 / Math.PI) + 180;
-    dialRotation = deg;
-    dialElement.style.transform = `translate(-50%, -50%) rotate(${dialRotation}deg)`;
+    const angle = getAngle(dialCenterX, dialCenterY, event.clientX, event.clientY);
+    rotateDial(dial, angle);
   }
 
   function onMouseUp() {
     document.removeEventListener("mousemove", onMouseMove);
     document.removeEventListener("mouseup", onMouseUp);
+    dial.style.transition = "transform 0.5s";
+    setTimeout(() => {
+      rotateDial(dial, 0);
+      dial.style.transition = "";
+    }, 0);
   }
 
   document.addEventListener("mousemove", onMouseMove);
   document.addEventListener("mouseup", onMouseUp);
 }
 
+dial.addEventListener("mousedown", onDialMouseDown);
+dialMiddle.addEventListener("mousedown", onDialMouseDown);
+dialBackground.addEventListener("mousedown", onDialMouseDown);
+
+// Show orange dial when red dial is double-clicked
+dial.addEventListener("dblclick", (e) => {
+  e.stopPropagation();
+  dialMiddle.style.display = "block";
+});
+
+// Show yellow dial when orange dial is double-clicked
+dialMiddle.addEventListener("dblclick", (e) => {
+  e.stopPropagation();
+  dialBackground.style.display = "block";
+});
+
+// Hide orange and yellow dials when clicking outside
+document.addEventListener("click", () => {
+  dialMiddle.style.display = "none";
+  dialBackground.style.display = "none";
+});
